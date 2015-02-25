@@ -1,0 +1,16 @@
+{
+  "parts": [
+    {
+      "name": "ep_indent_context",
+      "client_hooks": {
+        "postAceInit": "ep_indent_context/static/js/index",
+        "aceInitialized":"ep_indent_context/static/js/index",
+        "aceDomLinePreProcessLineAttributes":"ep_indent_context/static/js/index",
+        "aceAttribsToClasses":"ep_indent_context/static/js/index",
+        "aceRegisterBlockElements": "ep_indent_context/static/js/index"
+      },
+      "hooks": {
+      }
+    }
+  ]
+}
