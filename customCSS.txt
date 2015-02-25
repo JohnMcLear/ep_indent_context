@@ -1,0 +1,127 @@
+contextsection { counter-reset: contextsectionfirst contextsectionsecond; }
+
+contextsection:before{
+  list-style-type: upper-roman;
+  content: counter(contextsectionfirst, upper-roman) ". ";
+  counter-increment: contextsectionfirst;
+}
+
+contextchapter { counter-reset: contextchapterfirst contextchaptersecond; }
+
+contextchapter:before{
+  list-style-type: decimal;
+  content: counter(contextchapterfirst, decimal) ". ";
+  counter-increment: contextchapterfirst;
+}
+
+contextsubchapter { counter-reset: contextsubchapterfirst contextsubchaptersecond; }
+
+contextsubchapter:before{
+  list-style-type: upper-alpha;
+  content: counter(contextsubchapterfirst, upper-alpha) ". ";
+  counter-increment: contextsubchapterfirst;
+}
+
+
+contexttitle { counter-reset: contexttitlefirst contexttitlesecond; }
+
+contexttitle:before{
+  list-style-type: upper-roman;
+  content: counter(contexttitlefirst, upper-alpha) ". ";
+  counter-increment: contexttitlefirst;
+}
+
+
+body{
+  counter-reset:title indent1 indent2 indent3 indent4 indent5 indent6 indent7;
+}
+/*
+.list-indent1{
+}
+/*
+.list-indent1{
+  counter-reset:indentone indenttwo indentthree indentfour;
+}
+
+.list-indent2{
+  counter-reset:indentthree indentfour;
+}
+
+.list-indent3{
+  counter-reset:indent4 indent5 indent6 indent7 indent8;
+}
+
+.list-indent4{
+  counter-reset:indent5 indent6 indent7 indent8;
+}
+
+.list-indent5{
+  counter-reset:indent6 indent7 indent8;
+}
+
+.list-indent6{
+  counter-reset:indent7 indent8;
+}
+
+.list-indent7{
+  counter-reset:indent8;
+}
+*/
+
+li:before{
+  padding-right:5px;
+  min-width:15px;
+  display:inline-block;
+}
+
+/* Title */
+/* For a div > span which first child isn't a UL */
+#innerdocbody > div > span:first-child:not(ul):not(.number):before{
+  counter-increment: title;
+  content: counter(title, upper-roman) " ";
+  padding-right:5px;
+  min-width:15px;
+  display:inline-block;
+}
+
+/* Chapter */
+.list-indent1 > li:before{
+  counter-increment: indent1;
+  content: counter(indent1, decimal) " ";
+}
+
+/* Subchapter */
+.list-indent2 > li:before{
+  counter-increment: indent2;
+  content: counter(indent2, upper-alpha) ". ";
+}
+
+/* Section */
+.list-indent3 > li:before{
+  counter-increment: indent3;
+  content: "§" counter(indent3, decimal) " ";
+}
+
+/* Paragraph */
+.list-indent4 > li:before{
+  counter-increment: indent4;
+  content: counter(indent4, decimal) " ";
+}
+
+/* Subparagraph */
+.list-indent5 > li:before{
+  counter-increment: indent5;
+  content: counter(indent5, lower-alpha) ". ";
+}
+
+/* Clause */
+.list-indent6 > li:before{
+  counter-increment: indent6;
+  content: counter(indent6, lower-roman) ". ";
+}
+
+/* Subclause */
+.list-indent7 > li:before{
+  counter-increment: indent7;
+  content: counter(indent7, decimal) "BLUE DARVARK. ";
+}
