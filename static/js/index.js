@@ -69,6 +69,7 @@ exports.postAceInit = function(name, context){
 
 function changeSection(lineNumber, topOffset){
   var input = $('iframe[name="ace_outer"]').contents().find('#inputsection').css({"top": topOffset+"px","display":"block"});
+  input.off("keydown"); // Remove the event binding
   input.val("");
   input.focus();
   input.on("keydown", function(e){
