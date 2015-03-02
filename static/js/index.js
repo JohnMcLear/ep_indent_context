@@ -64,7 +64,6 @@ exports.postAceInit = function(name, context){
 
 function changeSection(lineNumber){
   var value = prompt("Change Line Number");
-  value = escape(value);
   padEditor.callWithAce(function(ace){ // call the function to apply the attribute inside ACE
     ace.ace_doSetLineNumber(lineNumber, value);
   }, 'number', true); // TODO what's the second attribute do here?
@@ -93,21 +92,11 @@ exports.doSetLineNumber = function(lineNumber,  value){
  * 
  ***/
 exports.aceDomLinePreProcessLineAttributes = function(name, context){
+  // Takes class values and parses them..  So we'd already need the class here..
   if( context.cls.indexOf("number") !== -1) var type="number";
   var value = /(?:^| )number:([%A-Za-z0-9]*)/.exec(context.cls);  
   if (value && value[1]){
-    var className = value[1].replace(/%20| /g, '-');
-    
-    // Add CSS to head, just for trial
-    var inner = $('iframe[name="ace_outer"]').contents().find('iframe[name="ace_inner"]');
-    var head = inner.contents().find("head");
-// First one might not be needed
-//    head.append("<style>.number"+value[1]+" before{content:'' !important;}</style>");
-// This one isn't strict enough
-//    head.append("<style>.number"+value[1]+":first-child:not(ul):before{content:'"+value[1]+"' !important;}</style>");
-    head.append("<style>.number"+className+":first-child:not(ul):before{display:none;content:'' !important;}</style>");
-    head.append("<style>.number"+className+" > ul > li:before{content:'"+unescape(value[1])+"' !important;}</style>");
-
+    var className = value[1];
     var modifier = {
       preHtml: '<number class="number number'+className+'">',
       postHtml: '</number>',
@@ -125,7 +114,21 @@ exports.aceDomLinePreProcessLineAttributes = function(name, context){
  ***/
 exports.aceAttribsToClasses = function(hook, context){
   if(context.key == 'number'){
-    var str = "number:"+context.value;
+    // We make a UID!  Pretty fancy huh!  This means we can have
+    // Escaped requiring chars such as f00$ in as a prefix
+    var className = makeid();
+    var inner = $('iframe[name="ace_outer"]').contents().find('iframe[name="ace_inner"]');
+    var head = inner.contents().find("head");
+    var content = context.value;
+
+// First one might not be needed
+//    head.append("<style>.number"+content+" before{content:'' !important;}</style>");
+// This one isn't strict enough
+//    head.append("<style>.number"+content+":first-child:not(ul):before{content:'"+content+"' !important;}</style>");
+
+    head.append("<style>.number"+className+":first-child:not(ul):before{display:none;content:'' !important;}</style>");
+    head.append("<style>.number"+className+" > ul > li:before{content:'"+content+"' !important;}</style>");
+    var str = "number:"+className;
     return [str];
   }
 }
@@ -133,4 +136,14 @@ exports.aceAttribsToClasses = function(hook, context){
 // Block elements - Prevents character walking
 exports.aceRegisterBlockElements = function(){
   return ['number'];
+}
+
+function makeid()
+{
+  var text = "";
+  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  for( var i=0; i < 5; i++ ){
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+  }
+  return text;
 }
