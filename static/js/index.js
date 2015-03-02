@@ -1,4 +1,5 @@
 var underscore = require('ep_etherpad-lite/static/js/underscore');
+var _ = underscore;
 var padEditor;
 
 /***
@@ -9,12 +10,19 @@ var padEditor;
 exports.aceInitialized = function(hook, context){
   var editorInfo = context.editorInfo;
   editorInfo.ace_doSetLineNumber = underscore(exports.doSetLineNumber).bind(context); // What does underscore do here?
+  editorInfo.ace_doRemoveLineNumber = underscore(exports.doRemoveLineNumber).bind(context); // What does underscore do here?
   padEditor = context.editorInfo.editor;
 }
 
 exports.postAceInit = function(name, context){
 
   $('iframe[name="ace_outer"]').contents().find('#sidediv').append("<input id='inputsection' style='top:6px;position:absolute;width:30px;left:25px;display:none;'>");
+
+  $(".numbericon").on("click", function(e){
+    padEditor.callWithAce(function(ace){ // call the function to apply the attribute inside ACE
+      ace.ace_doRemoveLineNumber();
+    }, 'number', true);
+  });
 
   // Show the definition on a click event
   context.ace.callWithAce(function(ace){
@@ -80,23 +88,43 @@ function changeSection(lineNumber, topOffset){
       input.hide(); // Remove the input box
       input.off("keydown"); // Remove the event binding
     }
-
+  });
+  input.on("blur", function(e){
+    input.hide();
+    input.off("keydown"); // Remove the event binding
   });
 };
 
 /***
  *
- * Toggle the line Attribute
+ * Set line Attribute
  *
  ***/
 exports.doSetLineNumber = function(lineNumber,  value){
   var documentAttributeManager = this.documentAttributeManager;
-  // var isDone = documentAttributeManager.getAttributeOnLine(lineNumber, 'number');
-  if(!value){
+  if(value === "") value = " ";
+  // documentAttributeManager.removeAttributeOnLine(lineNumber, 'number'); // remove the line attribute
+  documentAttributeManager.setAttributeOnLine(lineNumber, 'number', value); // make it done
+}
+
+/***
+ *
+ * Remove line Attribute
+ *
+ ***/
+exports.doRemoveLineNumber = function(){
+  var rep = {};
+  console.log(this.rep);
+  rep.selStart = this.rep.selStart;
+  rep.selEnd = this.rep.selEnd;
+  var documentAttributeManager = this.documentAttributeManager;
+
+  var firstLine, lastLine;
+  firstLine = rep.selStart[0];
+  lastLine = Math.max(firstLine, rep.selEnd[0] - ((rep.selEnd[1] === 0) ? 1 : 0));
+  _(_.range(firstLine, lastLine + 1)).each(function(lineNumber){
     documentAttributeManager.removeAttributeOnLine(lineNumber, 'number'); // remove the line attribute
-  }else{
-    documentAttributeManager.setAttributeOnLine(lineNumber, 'number', value); // make it done
-  }
+  });
 }
 
 

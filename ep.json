@@ -10,6 +10,7 @@
         "aceRegisterBlockElements": "ep_indent_context/static/js/index"
       },
       "hooks": {
+        "eejsBlock_editbarMenuLeft": "ep_indent_context/index"
       }
     }
   ]
