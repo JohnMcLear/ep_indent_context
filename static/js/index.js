@@ -14,12 +14,17 @@ exports.aceInitialized = function(hook, context){
 
 exports.postAceInit = function(name, context){
 
+  $('iframe[name="ace_outer"]').contents().find('#sidediv').append("<input id='inputsection' style='top:6px;position:absolute;width:30px;left:25px;display:none;'>");
+
   // Show the definition on a click event
   context.ace.callWithAce(function(ace){
     var doc = ace.ace_getDocument();
     var $inner = $(doc).find('#innerdocbody');
     // On click ensure all image controls are hidden
     $inner.on("click", "div", function(e){
+      var topOffset = $(this).offset().top +3; // Gets the offset from the top
+      // this is used for putting an input in place
+
       // Get line number
       var lineNumber = $(this).prevAll().length;
 
@@ -27,7 +32,7 @@ exports.postAceInit = function(name, context){
       var offset = 20;
       // Click offset was < 20px so must be wanting to change line number
       if(clientX <= offset){
-        changeSection(lineNumber);
+        changeSection(lineNumber, topOffset);
         return;
       }
 
@@ -54,7 +59,7 @@ exports.postAceInit = function(name, context){
         // console.log("cC", counterClicked);
         if(counterClicked){
           // I need to get line number..
-          changeSection(lineNumber);
+          changeSection(lineNumber, topOffset);
         }
         
        }
@@ -62,11 +67,20 @@ exports.postAceInit = function(name, context){
   });
 }
 
-function changeSection(lineNumber){
-  var value = prompt("Change Line Number");
-  padEditor.callWithAce(function(ace){ // call the function to apply the attribute inside ACE
-    ace.ace_doSetLineNumber(lineNumber, value);
-  }, 'number', true); // TODO what's the second attribute do here?
+function changeSection(lineNumber, topOffset){
+  var input = $('iframe[name="ace_outer"]').contents().find('#inputsection').css({"top": topOffset+"px","display":"block"});
+  input.val("");
+  input.focus();
+  input.on("keydown", function(e){
+    if(e.keyCode === 13){ // On enter key
+      padEditor.callWithAce(function(ace){ // call the function to apply the attribute inside ACE
+        ace.ace_doSetLineNumber(lineNumber, input.val());
+      }, 'number', true);
+      input.hide(); // Remove the input box
+      input.off("keydown"); // Remove the event binding
+    }
+
+  });
 };
 
 /***
@@ -76,7 +90,7 @@ function changeSection(lineNumber){
  ***/
 exports.doSetLineNumber = function(lineNumber,  value){
   var documentAttributeManager = this.documentAttributeManager;
-  var isDone = documentAttributeManager.getAttributeOnLine(lineNumber, 'number');
+  // var isDone = documentAttributeManager.getAttributeOnLine(lineNumber, 'number');
   if(!value){
     documentAttributeManager.removeAttributeOnLine(lineNumber, 'number'); // remove the line attribute
   }else{

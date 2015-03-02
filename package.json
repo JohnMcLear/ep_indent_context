@@ -1,7 +1,7 @@
 {
   "name": "ep_indent_context",
   "description": "indent_context with prefix values",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": {
     "name": "John McLear",
     "email": "john@mclear.co.uk",
