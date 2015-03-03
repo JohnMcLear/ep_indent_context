@@ -16,7 +16,7 @@ exports.aceInitialized = function(hook, context){
 
 exports.postAceInit = function(name, context){
 
-  $('iframe[name="ace_outer"]').contents().find('#sidediv').append("<input id='inputsection' style='top:6px;position:absolute;width:30px;left:25px;display:none;'>");
+  $('iframe[name="ace_outer"]').contents().find('#sidediv').append("<input id='inputsection' style='margin-top:3px;font-size:11px;line-height:14px;top:6px;position:absolute;width:20px;height:14px;display:none;'>");
 
   $(".numbericon").on("click", function(e){
     padEditor.callWithAce(function(ace){ // call the function to apply the attribute inside ACE
@@ -40,6 +40,7 @@ exports.postAceInit = function(name, context){
       var offset = 20;
       // Click offset was < 20px so must be wanting to change line number
       if(clientX <= offset){
+        $('iframe[name="ace_outer"]').contents().find('#outerdocbody > #sidediv > #inputsection').css({"left":"26px"});
         changeSection(lineNumber, topOffset);
         return;
       }
@@ -52,6 +53,7 @@ exports.postAceInit = function(name, context){
         var clientX = e.clientX;
         elementLeft = elementLeft.replace("px", "");
         elementLeft = parseInt(elementLeft);
+        var inputLeft = elementLeft + 25; // left of the input
 
         // This is a hack.  We can't get the actual width of a psuedo element so we only
         // check first 20 px ..
@@ -66,6 +68,7 @@ exports.postAceInit = function(name, context){
         // console.log("cX", clientX);
         // console.log("cC", counterClicked);
         if(counterClicked){
+          $('iframe[name="ace_outer"]').contents().find('#outerdocbody > #sidediv > #inputsection').css({"left":inputLeft+"px"});
           // I need to get line number..
           changeSection(lineNumber, topOffset);
         }
@@ -90,7 +93,7 @@ function changeSection(lineNumber, topOffset){
     }
   });
   input.on("blur", function(e){
-    input.hide();
+    // input.hide();
     input.off("keydown"); // Remove the event binding
   });
 };
@@ -114,7 +117,6 @@ exports.doSetLineNumber = function(lineNumber,  value){
  ***/
 exports.doRemoveLineNumber = function(){
   var rep = {};
-  console.log(this.rep);
   rep.selStart = this.rep.selStart;
   rep.selEnd = this.rep.selEnd;
   var documentAttributeManager = this.documentAttributeManager;
