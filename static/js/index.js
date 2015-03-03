@@ -9,14 +9,18 @@ var padEditor;
 ***/
 exports.aceInitialized = function(hook, context){
   var editorInfo = context.editorInfo;
+  editorInfo.ace_doGetLineNumber = underscore(exports.doGetLineNumber).bind(context); // What does underscore do here?
   editorInfo.ace_doSetLineNumber = underscore(exports.doSetLineNumber).bind(context); // What does underscore do here?
   editorInfo.ace_doRemoveLineNumber = underscore(exports.doRemoveLineNumber).bind(context); // What does underscore do here?
   padEditor = context.editorInfo.editor;
 }
 
+
+
 exports.postAceInit = function(name, context){
 
   $('iframe[name="ace_outer"]').contents().find('#sidediv').append("<input id='inputsection' style='margin-top:3px;font-size:11px;line-height:14px;top:6px;position:absolute;width:20px;height:14px;display:none;'>");
+  $('iframe[name="ace_outer"]').contents().find('#sidediv').append("<span id='inputsectionhidden' style='margin-top:3px;font-size:11px;line-height:14px;top:6px;position:absolute;height:14px;display:block;background-color:#000;font-family:arial;display:none;'></span>");
 
   $(".numbericon").on("click", function(e){
     padEditor.callWithAce(function(ace){ // call the function to apply the attribute inside ACE
@@ -38,42 +42,63 @@ exports.postAceInit = function(name, context){
 
       var clientX = e.clientX;
       var offset = 20;
+
+      padEditor.callWithAce(function(ace){ // call the function to apply the attribute inside ACE
+        var content = ace.ace_doGetLineNumber(lineNumber); // Get the content of the line number section prefix
+
+        // Write content to hidden span with same styling as parent.
+        $('iframe[name="ace_outer"]').contents().find('#outerdocbody > #sidediv > #inputsectionhidden').text(content);
+        
+        // Get the width of the new contained with the content in
+        var inputWidth = $('iframe[name="ace_outer"]').contents().find('#outerdocbody > #sidediv > #inputsectionhidden').width();
+        // console.log("iW", inputWidth);
+        if(inputWidth < 10) inputWidth = 10; // if its too small make it bigger
+        inputWidth = inputWidth + 5;
+        $('iframe[name="ace_outer"]').contents().find('#outerdocbody > #sidediv > #inputsection').css({"width":inputWidth+"px"});
+        
+        // Travel up the dom until we find the parent UL
+        var ul = $(e.target).closest("ul"); // Gets the closest UL
+
+        var elementLeft = $(ul).css("margin-left");
+        if(elementLeft){
+          var clientX = e.clientX;
+          elementLeft = elementLeft.replace("px", "");
+          elementLeft = parseInt(elementLeft);
+
+          var inputLeft = elementLeft + 33; // left of the input
+
+          // This is a hack.  We can't get the actual width of a psuedo element so we only
+          // check first 20 px ..
+          var maxClient = elementLeft +inputWidth;
+
+          // clientX = the left click location IE 150
+          // elementLeft = Where the left Element starts
+          // maxClient = The max X location a client can click before it's no longer used.
+          var counterClicked = clientX < maxClient;
+  
+          // console.log("mC", maxClient);
+          // console.log("cX", clientX);
+          // console.log("cC", counterClicked);
+          if(counterClicked){
+            $('iframe[name="ace_outer"]').contents().find('#outerdocbody > #sidediv > #inputsection').css({"left":inputLeft+"px"});
+            // I need to get line number..
+            changeSection(lineNumber, topOffset);
+          }
+        
+         }
+
+
+      }, 'number', true);
+/*
       // Click offset was < 20px so must be wanting to change line number
+      // This happens on none nested items which we hope to avoid when we switch to OL
       if(clientX <= offset){
         $('iframe[name="ace_outer"]').contents().find('#outerdocbody > #sidediv > #inputsection').css({"left":"26px"});
         changeSection(lineNumber, topOffset);
         return;
       }
+*/
 
-      // Travel up the dom until we find the parent UL
-      var ul = $(e.target).closest("ul"); // Gets the closest UL
-
-      var elementLeft = $(ul).css("margin-left");
-      if(elementLeft){
-        var clientX = e.clientX;
-        elementLeft = elementLeft.replace("px", "");
-        elementLeft = parseInt(elementLeft);
-        var inputLeft = elementLeft + 25; // left of the input
-
-        // This is a hack.  We can't get the actual width of a psuedo element so we only
-        // check first 20 px ..
-        var maxClient = elementLeft +offset;
-
-        // clientX = the left click location IE 150
-        // elementLeft = Where the left Element starts
-        // maxClient = The max X location a client can click before it's no longer used.
-        var counterClicked = clientX < maxClient;
-
-        // console.log("mC", maxClient);
-        // console.log("cX", clientX);
-        // console.log("cC", counterClicked);
-        if(counterClicked){
-          $('iframe[name="ace_outer"]').contents().find('#outerdocbody > #sidediv > #inputsection').css({"left":inputLeft+"px"});
-          // I need to get line number..
-          changeSection(lineNumber, topOffset);
-        }
-        
-       }
     });
   });
 }
@@ -93,10 +118,20 @@ function changeSection(lineNumber, topOffset){
     }
   });
   input.on("blur", function(e){
-    // input.hide();
+    input.hide();
     input.off("keydown"); // Remove the event binding
   });
 };
+
+/***
+ * 
+ * Get line Attribute
+ *
+ ***/
+exports.doGetLineNumber = function(lineNumber){
+  var documentAttributeManager = this.documentAttributeManager;
+  return documentAttributeManager.getAttributeOnLine(lineNumber, 'number'); // remove the line attribute
+}
 
 /***
  *
