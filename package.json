@@ -16,5 +16,9 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/JohnMcLear/ep_indent_context.git"
+  },
+  "funding": {
+    "type": "individual",
+    "url": "http://etherpad.org/"
   }
 }
